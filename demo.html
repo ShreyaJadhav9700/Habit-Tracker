@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="favicon.png"> <!-- Your favicon -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e1cbb5; /* Light lavender background */
+            transition: background-color 0.3s ease; /* Smooth transition for background color */
+        }
+        .active {
+            background-color: #fbbf24; /* Hot pink for active button */
+        }
+        .btn {
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #efb5d0; /* Light hot pink on hover */
+        }
+        .table-header {
+            background-color:  #d585ae; /* Hot pink background for header */
+            color: white; /* White text for header */
+        }
+        .table-row {
+            transition: background-color 0.3s ease;
+        }
+        .table-row:hover {
+            background-color: #b0aeae; /* Light pink on hover */
+        }
+        .checkbox {
+            appearance: none; /* Remove default checkbox styling */
+            width: 20px; /* Custom width */
+            height: 20px; /* Custom height */
+            border: 2px solid #d53f8c; /* Pink border */
+            border-radius: 4px; /* Rounded corners */
+            outline: none; /* Remove outline */
+            cursor: pointer; /* Change cursor to pointer */
+            position: relative; /* Position for the checkmark */
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+        }
+        .checkbox:checked {
+            background-color: #d0528d; /* Yellow background when checked */
+            border-color: #70dee6; /* Match border color */
+        }
+        .checkbox:checked::after {
+            content: ''; /* Create a checkmark */
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid black; /* Black checkmark */
+            border-width: 0 2px 2px 0; /* Create a checkmark shape */
+            transform: rotate(45deg); /* Rotate to form a checkmark */
+        }
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.5rem; /* Adjust font size for smaller screens */
+            }
+            h2 {
+                font-size: 1rem; /* Adjust font size for smaller screens */
+            }
+            .table-responsive {
+                overflow-x: auto; /* Allow horizontal scrolling on small screens */
+            }
+        }
+
+        /* Batman Theme */
+        .batman-theme {
+            background-color: #121212;
+            color: #f1f1f1;
+        }
+
+        .batman-theme #habitTracker,
+        .batman-theme .bg-white {
+            background-color: #1e1e1e !important;
+            color: #f1f1f1;
+        }
+
+        .batman-theme input,
+        .batman-theme select,
+        .batman-theme button,
+        .batman-theme #habitInput {
+            background-color: #2c2c2c;
+            color: #f1f1f1;
+            border: 1px solid #555;
+        }
+
+        .batman-theme input::placeholder,
+        .batman-theme select option {
+            color: #aaa;
+        }
+
+        .batman-theme .table-header {
+            background-color: #222;
+            color: #ffeb3b;
+        }
+
+        .batman-theme td {
+            color: #f1f1f1;
+        }
+
+        .batman-theme .checkbox {
+            border-color: #ffeb3b;
+        }
+
+        .batman-theme .checkbox:checked {
+            background-color: #ffeb3b;
+            border-color: #ffc107;
+        }
+
+        /* Button hover color in Batman theme */
+        .batman-theme .btn {
+            background-color: #2c2c2c; /* Default button color */
+            color: #878787; /* Text color */
+        }
+
+        .batman-theme .btn:hover {
+            background-color: #444; /* Darker gray on hover */
+            color: #ffeb3b; /* Yellow text on hover */
+        }
+
+        /* Specific styles for the login button in Batman theme */
+        .batman-theme .login-btn {
+            background-color: #2c2c2c; /* Default button color */
+            color: #b9b7b7; /* Text color */
+        }
+
+        .batman-theme .login-btn:hover {
+            background-color: #444; /* Darker gray on hover */
+            color: #ffeb3b; /* Yellow text on hover */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4" id="body">
+    <!-- Login Page -->
+    <div id="loginPage" class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mx-auto">
+        <h1 class="text-2xl font-semibold mb-4 text-center">Login</h1>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label for="themeSelect" class="block text-gray-700">Select Theme</label>
+                <select id="themeSelect" class="border border-gray-300 rounded-lg p-2 w-full">
+                    <option value="barbie">Female</option>
+                    <option value="batman">Male</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700">Username</label>
+                <input type="text" id="username" class="border border-gray-300 rounded-lg p-2 w-full" value="Chetna" readonly />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700">Password</label>
+                <input type="password" id="password" class="border border-gray-300 rounded-lg p-2 w-full" value="123" readonly />
+            </div>
+            <button type="submit" class="login-btn btn bg-pink-500 text-white px-4 py-2 rounded-lg w-full">Login</button>
+        </form>
+    </div>
+
+    <!-- Habit Tracker Page -->
+    <div id="habitTracker" class="bg-white rounded-lg shadow-lg p-8 w-full max-w-4xl hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+            <h1 class="text-2xl font-semibold mb-4 sm:mb-0" id="greeting">Good afternoon, Chetna 🌷</h1>
+            <button class="btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg" id="addHabitBtn">+ Add habit</button>
+        </div>
+        <div class="flex justify-center mb-4">
+            <button class="btn bg-gray-200 text-gray-700 px-4 py-2 rounded-l-lg active" id="weekBtn">Week</button>
+            <button class="btn bg-gray-200 text-gray-700 px-4 py-2" id="monthBtn">Month</button>
+            <button class="btn bg-gray-200 text-gray-700 px-4 py-2 rounded-r-lg" id="yearBtn">Year</button>
+        </div>
+        <div class="flex justify-between items-center mb-4">
+            <button class="text-gray-500" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+            <h2 class="text-lg font-semibold" id="dateRange">Monday, Jan 1 — Sunday, Jan 7</h2>
+            <button class="text-gray-500" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="table-responsive overflow-x-auto">
+            <table class="w-full text-center" id="habitTable">
+                <thead>
+                    <tr class="table-header">
+                        <th class="py-2">Habit</th>
+                        <th class="py-2">Mon</th>
+                        <th class="py-2">Tue</th>
+                        <th class="py-2">Wed</th>
+                        <th class="py-2">Thu</th>
+                        <th class="py-2">Fri</th>
+                        <th class="py-2">Sat</th>
+                        <th class="py-2">Sun</th>
+                    </tr>
+                </thead>
+                <tbody id="habitBody">
+                    <!-- Habit rows will be dynamically added here -->
+                    <tr class="table-row">
+                        <td class="py-2 font-semibold">Boys</td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                        <td class="py-2"><input type="checkbox" class="checkbox"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for adding habits -->
+    <div id="addHabitModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 w-80">
+            <h2 class="text-lg font-semibold mb-4">Add Habit</h2>
+            <input type="text" id="habitInput" class="border border-gray-300 rounded-lg p-2 w-full mb-4" placeholder="Habit name" />
+            <button id="saveHabitBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Save Habit</button>
+            <button id="closeModalBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg ml-2">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let currentView = 'week';
+        let currentDate = new Date();
+        let habits = [
+            { name: '📒 Journal', days: Array(7).fill(false) },
+            { name: '🏋️‍♀️ Lift', days: [true, true, false, true, false, false, true] },
+            { name: '🧘 Yoga', days: [false, false, true, false, false, true, false] },
+            { name: '💧 Drink water', days: [true, false, true, false, true, false, true] },
+            { name: '🐕 Walk the dog', days: [false, true, false, true, false, true, false] },
+            { name: '🪴 Plant care', days: [false, false, true, false, false, true, false] },
+            { name: '🧴 Skin care', days: [true, false, true, false, true, false, true] },
+            { name: '📚 Read', days: [true, false, false, false, true, false, false] }, // New habit added
+        ];
+
+        // Show the habit tracker after successful login
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const theme = document.getElementById('themeSelect').value;
+
+            if (username === 'Chetna' && password === '123') {
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('habitTracker').classList.remove('hidden');
+
+                // Apply the selected theme
+                if (theme === 'batman') {
+                    document.body.classList.add('batman-theme');
+                    document.getElementById('greeting').innerText = 'Good evening, Chetna 🦇';
+                } else {
+                    document.body.classList.remove('batman-theme');
+                    document.getElementById('greeting').innerText = 'Good afternoon, Chetna 🌷';
+                }
+
+                renderDateRange();
+                renderHabits();
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+
+        document.getElementById('addHabitBtn').addEventListener('click', function() {
+            document.getElementById('addHabitModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', function() {
+            document.getElementById('addHabitModal').classList.add('hidden');
+        });
+
+        document.getElementById('saveHabitBtn').addEventListener('click', function() {
+            const habitName = document.getElementById('habitInput').value;
+            if (habitName) {
+                habits.push({ name: habitName, days: Array(7).fill(false) });
+                document.getElementById('habitInput').value = '';
+                document.getElementById('addHabitModal').classList.add('hidden');
+                renderHabits();
+            }
+        });
+
+        document.getElementById('weekBtn').addEventListener('click', function() {
+            setActiveButton('weekBtn');
+            currentView = 'week';
+            renderDateRange();
+            renderHabits();
+        });
+
+        document.getElementById('monthBtn').addEventListener('click', function() {
+            setActiveButton('monthBtn');
+            currentView = 'month';
+            renderDateRange();
+            renderHabits();
+        });
+
+        document.getElementById('yearBtn').addEventListener('click', function() {
+            setActiveButton('yearBtn');
+            currentView = 'year';
+            renderDateRange();
+            renderHabits();
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() - 7);
+            } else if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else if (currentView === 'year') {
+                currentDate.setFullYear(currentDate.getFullYear() - 1);
+            }
+            renderDateRange();
+            renderHabits();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else if (currentView === 'year') {
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+            }
+            renderDateRange();
+            renderHabits();
+        });
+
+        function setActiveButton(buttonId) {
+            document.getElementById('weekBtn').classList.remove('active');
+            document.getElementById('monthBtn').classList.remove('active');
+            document.getElementById('yearBtn').classList.remove('active');
+            document.getElementById(buttonId).classList.add('active');
+        }
+
+        function renderDateRange() {
+            const startDate = new Date(currentDate);
+            const endDate = new Date(currentDate);
+            if (currentView === 'week') {
+                startDate.setDate(startDate.getDate() - startDate.getDay() + 1); // Monday
+                endDate.setDate(endDate.getDate() - endDate.getDay() + 7); // Sunday
+                document.getElementById('dateRange').innerText = `${startDate.toLocaleDateString()} — ${endDate.toLocaleDateString()}`;
+            } else if (currentView === 'month') {
+                const month = startDate.toLocaleString('default', { month: 'long' });
+                const year = startDate.getFullYear();
+                document.getElementById('dateRange').innerText = `${month} ${year}`;
+            } else if (currentView === 'year') {
+                const year = startDate.getFullYear();
+                document.getElementById('dateRange').innerText = `${year}`;
+            }
+        }
+
+        function renderHabits() {
+            const habitBody = document.getElementById('habitBody');
+            habitBody.innerHTML = ''; // Clear existing habits
+            habits.forEach((habit) => {
+                const row = document.createElement('tr');
+                row.className = 'table-row';
+                const habitCell = document.createElement('td');
+                habitCell.className = 'py-2 font-semibold';
+                habitCell.innerText = habit.name;
+                row.appendChild(habitCell);
+                for (let i = 0; i < 7; i++) {
+                    const cell = document.createElement('td');
+                    cell.className = 'py-2';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = habit.days[i];
+                    checkbox.className = 'checkbox';
+                    checkbox.addEventListener('change', function() {
+                        habit.days[i] = checkbox.checked; // Update the habit's completion status
+                    });
+                    cell.appendChild(checkbox);
+                    row.appendChild(cell);
+                }
+                habitBody.appendChild(row);
+            });
+        }
+
+        // Initial render
+        renderDateRange();
+        renderHabits();
+    </script>
+</body>
+</html>  
